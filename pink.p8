@@ -1044,7 +1044,14 @@ end
 
 function enemies_update()
 	for e in all(enemies) do
-		if not player.dying
+		if player.punching
+		and (collide(player, e) or punch_collide(player, e)) then
+			sfx(0)
+			e.dying=true
+			e.dy=-2
+			e.dx=player.flp and -1.5 or 1.5
+			score+=1
+		elseif not player.dying
 		and not player.punching
 		and not e.dying
 		and collide(player, e) then
@@ -1063,13 +1070,6 @@ function enemies_update()
 					player.falling = true
 				end
 			end
-		end
-		if player.punching and collide(player, e) then
-			sfx(0)
-			e.dying=true
-			e.dy=-2
-			e.dx=player.flp and -1.5 or 1.5
-			score+=1
 		end
 		if e.dying then
 			e.dy+=0.3
@@ -1170,6 +1170,28 @@ function collide(a, b)
 	local by=b.y
 	local bw=b.w-2
 	local bh=b.h
+
+	return ax<bx+bw
+	and ax+aw>bx
+	and ay<by+bh
+	and ay+ah>by
+end
+
+function punch_collide(a, b)
+	local ax
+	local ay=a.y+1
+	local aw=2
+	local ah=a.h-2
+	local bx=b.x+1
+	local by=b.y
+	local bw=b.w-2
+	local bh=b.h
+
+	if a.flp then
+		ax=a.x-1
+	else
+		ax=a.x+a.w-1
+	end
 
 	return ax<bx+bw
 	and ax+aw>bx
@@ -1381,4 +1403,3 @@ __music__
 01 13141556
 02 13141516
 00 1a1b1c44
-
